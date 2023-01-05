@@ -1,0 +1,22 @@
+# IDE generated files #
+######################
+.idea
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Custom #
+######################
+Thumbs.db
+vendor
+coverage
+composer.lock
+.php_cs.cache
+.php-cs-fixer.cache
+.phpunit.result.cache

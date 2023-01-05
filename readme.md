@@ -1,0 +1,2 @@
+# Symfony Scaleway TEM mailer
+
