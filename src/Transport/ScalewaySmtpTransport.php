@@ -1,33 +1,34 @@
 <?php
 
-namespace Symfony\Component\Mailer\Bridge\Scaleway\Transport;
+namespace Korridor\SymfonyScalewayTemMailer\Transport;
 
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Mailer\Envelope;
-use Symfony\Component\Mailer\Exception\TransportException;
-use Symfony\Component\Mailer\Header\MetadataHeader;
-use Symfony\Component\Mailer\Header\TagHeader;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
 use Symfony\Component\Mime\Message;
 use Symfony\Component\Mime\RawMessage;
 
-/**
- * @author Kevin Verschaeve
- */
 class ScalewaySmtpTransport extends EsmtpTransport
 {
-    private $messageStream;
-
     private const HOSTNAME = 'smtp.tem.scw.cloud';
 
-    public function __construct(string $id, EventDispatcherInterface $dispatcher = null, LoggerInterface $logger = null)
+    private string $token;
+
+    private string $region;
+
+    private string $projectId;
+
+    public function __construct(string $token, string $region, string $projectId, EventDispatcherInterface $dispatcher = null, LoggerInterface $logger = null)
     {
+        $this->token = $token;
+        $this->region = $region;
+        $this->projectId = $projectId;
         parent::__construct(self::HOSTNAME, 587, false, $dispatcher, $logger);
 
-        $this->setUsername($id);
-        $this->setPassword($id);
+        $this->setUsername($projectId);
+        $this->setPassword($token);
     }
 
     public function send(RawMessage $message, Envelope $envelope = null): ?SentMessage
@@ -47,12 +48,26 @@ class ScalewaySmtpTransport extends EsmtpTransport
     }
 
     /**
-     * @return $this
+     * @return string
      */
-    public function setMessageStream(string $messageStream): static
+    public function getToken(): string
     {
-        $this->messageStream = $messageStream;
+        return $this->token;
+    }
 
-        return $this;
+    /**
+     * @return string
+     */
+    public function getRegion(): string
+    {
+        return $this->region;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProjectId(): string
+    {
+        return $this->projectId;
     }
 }

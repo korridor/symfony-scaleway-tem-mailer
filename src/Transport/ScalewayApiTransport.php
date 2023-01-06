@@ -1,14 +1,11 @@
 <?php
 
-namespace Symfony\Component\Mailer\Bridge\Scaleway\Transport;
+namespace Korridor\SymfonyScalewayTemMailer\Transport;
 
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\Exception\HttpTransportException;
-use Symfony\Component\Mailer\Exception\TransportException;
-use Symfony\Component\Mailer\Header\MetadataHeader;
-use Symfony\Component\Mailer\Header\TagHeader;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Transport\AbstractApiTransport;
 use Symfony\Component\Mime\Address;
@@ -18,9 +15,6 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
-/**
- * @author Kevin Verschaeve
- */
 class ScalewayApiTransport extends AbstractApiTransport
 {
     private const HOST = 'api.scaleway.com';
@@ -29,18 +23,19 @@ class ScalewayApiTransport extends AbstractApiTransport
 
     private string $region;
 
-    private $messageStream;
+    private string $projectId;
 
-    public function __construct(string $token, string $region, HttpClientInterface $client = null, EventDispatcherInterface $dispatcher = null, LoggerInterface $logger = null)
+    public function __construct(string $token, string $region, string $projectId, HttpClientInterface $client = null, EventDispatcherInterface $dispatcher = null, LoggerInterface $logger = null)
     {
         $this->token = $token;
         $this->region = $region;
+        $this->projectId = $projectId;
         parent::__construct($client, $dispatcher, $logger);
     }
 
     public function __toString(): string
     {
-        return sprintf('scaleway+api://%s', $this->getEndpoint()).($this->messageStream ? '?message_stream='.$this->messageStream : '');
+        return sprintf('scaleway+api://%s', $this->getEndpoint());
     }
 
     protected function doSendApi(SentMessage $sentMessage, Email $email, Envelope $envelope): ResponseInterface
@@ -63,10 +58,10 @@ class ScalewayApiTransport extends AbstractApiTransport
         }
 
         if (200 !== $statusCode) {
-            throw new HttpTransportException('Unable to send an email: '.$result['Message'].sprintf(' (code %d).', $result['ErrorCode']), $response);
+            throw new HttpTransportException('Unable to send an email: '.$result['message'].' Details: '.print_r($result, true), $response);
         }
 
-        $sentMessage->setMessageId($result['MessageID']);
+        $sentMessage->setMessageId($result['id']); // TODO: what is message_id
 
         return $response;
     }
@@ -81,6 +76,7 @@ class ScalewayApiTransport extends AbstractApiTransport
             'subject' => $email->getSubject(),
             'text' => $email->getTextBody(),
             'html' => $email->getHtmlBody(),
+            'project_id' => $this->projectId,
             'attachments' => $this->getAttachments($email),
         ];
 
@@ -90,36 +86,7 @@ class ScalewayApiTransport extends AbstractApiTransport
                 continue;
             }
 
-            if ($header instanceof TagHeader) {
-                if (isset($payload['Tag'])) {
-                    throw new TransportException('Scaleway only allows a single tag per email.');
-                }
-
-                $payload['Tag'] = $header->getValue();
-
-                continue;
-            }
-
-            if ($header instanceof MetadataHeader) {
-                $payload['Metadata'][$header->getKey()] = $header->getValue();
-
-                continue;
-            }
-
-            if ($header instanceof MessageStreamHeader) {
-                $payload['MessageStream'] = $header->getValue();
-
-                continue;
-            }
-
-            $payload['Headers'][] = [
-                'Name' => $header->getName(),
-                'Value' => $header->getBodyAsString(),
-            ];
-        }
-
-        if (null !== $this->messageStream && !isset($payload['MessageStream'])) {
-            $payload['MessageStream'] = $this->messageStream;
+            // TODO: ?
         }
 
         return $payload;
@@ -171,23 +138,27 @@ class ScalewayApiTransport extends AbstractApiTransport
         return $attachments;
     }
 
+    /**
+     * @return string|null
+     */
     private function getEndpoint(): ?string
     {
         return ($this->host ?: self::HOST).($this->port ? ':'.$this->port : '');
     }
 
+    /**
+     * @return string
+     */
     private function getRegion(): string
     {
         return $this->region;
     }
 
     /**
-     * @return $this
+     * @return string
      */
-    public function setMessageStream(string $messageStream): static
+    public function getProjectId(): string
     {
-        $this->messageStream = $messageStream;
-
-        return $this;
+        return $this->projectId;
     }
 }

@@ -1,12 +1,11 @@
 <?php
 
-namespace Symfony\Component\Mailer\Bridge\Scaleway\Tests\Transport;
+namespace Korridor\SymfonyScalewayTemMailer\Tests\Transport;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
-use Symfony\Component\Mailer\Bridge\Scaleway\Transport\MessageStreamHeader;
-use Symfony\Component\Mailer\Bridge\Scaleway\Transport\ScalewayApiTransport;
+use Korridor\SymfonyScalewayTemMailer\Transport\ScalewayApiTransport;
 use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\Exception\HttpTransportException;
 use Symfony\Component\Mailer\Exception\TransportException;
@@ -30,36 +29,18 @@ class ScalewayApiTransportTest extends TestCase
     {
         return [
             [
-                new ScalewayApiTransport('KEY', 'par-fr'),
+                new ScalewayApiTransport('token', 'par-fr', 'project-id'),
                 'scaleway+api://api.scaleway.com',
             ],
             [
-                (new ScalewayApiTransport('KEY', 'par-fr'))->setHost('example.com'),
+                (new ScalewayApiTransport('token', 'par-fr', 'project-id'))->setHost('example.com'),
                 'scaleway+api://example.com',
             ],
             [
-                (new ScalewayApiTransport('KEY', 'par-fr'))->setHost('example.com')->setPort(99),
+                (new ScalewayApiTransport('token', 'par-fr', 'project-id'))->setHost('example.com')->setPort(99),
                 'scaleway+api://example.com:99',
             ],
         ];
-    }
-
-    public function testCustomHeader(): void
-    {
-        // Arrange
-        $email = new Email();
-        $email->getHeaders()->addTextHeader('foo', 'bar');
-        $envelope = new Envelope(new Address('alice@system.com'), [new Address('bob@system.com')]);
-        $transport = new ScalewayApiTransport('ACCESS_KEY', 'par-fr');
-        $method = new \ReflectionMethod(ScalewayApiTransport::class, 'getPayload');
-
-        // Act
-        $payload = $method->invoke($transport, $email, $envelope);
-
-        // Assert
-        $this->assertArrayHasKey('Headers', $payload);
-        $this->assertCount(1, $payload['Headers']);
-        $this->assertEquals(['Name' => 'foo', 'Value' => 'bar'], $payload['Headers'][0]);
     }
 
     public function testSend(): void
@@ -77,12 +58,12 @@ class ScalewayApiTransportTest extends TestCase
             $this->assertSame('Hello!', $body['subject']);
             $this->assertSame('Hello There!', $body['text']);
 
-            return new MockResponse(json_encode(['MessageID' => 'foobar']), [
+            return new MockResponse(json_encode(['id' => 'foo-bar']), [
                 'http_code' => 200,
             ]);
         });
 
-        $transport = new ScalewayApiTransport('KEY', 'par-fr', $client);
+        $transport = new ScalewayApiTransport('token', 'par-fr', 'project-id', $client);
 
         $mail = new Email();
         $mail->subject('Hello!')
@@ -96,21 +77,23 @@ class ScalewayApiTransportTest extends TestCase
         $message = $transport->send($mail);
 
         // Assert
-        $this->assertSame('foobar', $message->getMessageId());
+        $this->assertSame('foo-bar', $message->getMessageId());
     }
 
     public function testSendThrowsForErrorResponse(): void
     {
         // Arrange
         $client = new MockHttpClient(static function (string $method, string $url, array $options): ResponseInterface {
-            return new MockResponse(json_encode(['Message' => 'i\'m a teapot', 'ErrorCode' => 418]), [
+            return new MockResponse(json_encode([
+                'message' => 'i\'m a teapot',
+            ]), [
                 'http_code' => 418,
                 'response_headers' => [
                     'content-type' => 'application/json',
                 ],
             ]);
         });
-        $transport = new ScalewayApiTransport('KEY', 'par-fr', $client);
+        $transport = new ScalewayApiTransport('token', 'par-fr', 'project-id', $client);
         $transport->setPort(8984);
 
         $mail = new Email();
@@ -120,49 +103,7 @@ class ScalewayApiTransportTest extends TestCase
             ->text('Hello There!');
 
         $this->expectException(HttpTransportException::class);
-        $this->expectExceptionMessage('Unable to send an email: i\'m a teapot (code 418).');
+        $this->expectExceptionMessage('Unable to send an email: i\'m a teapot');
         $transport->send($mail);
-    }
-
-    public function testTagAndMetadataAndMessageStreamHeaders(): void
-    {
-        // Arrange
-        $email = new Email();
-        $email->getHeaders()->add(new TagHeader('password-reset'));
-        $email->getHeaders()->add(new MetadataHeader('Color', 'blue'));
-        $email->getHeaders()->add(new MetadataHeader('Client-ID', '12345'));
-        $email->getHeaders()->add(new MessageStreamHeader('broadcasts'));
-        $envelope = new Envelope(new Address('alice@system.com'), [new Address('bob@system.com')]);
-
-        $transport = new ScalewayApiTransport('ACCESS_KEY', 'par-fr');
-        $method = new \ReflectionMethod(ScalewayApiTransport::class, 'getPayload');
-
-        // Act
-        $payload = $method->invoke($transport, $email, $envelope);
-
-        // Assert
-        $this->assertArrayNotHasKey('Headers', $payload);
-        $this->assertArrayHasKey('Tag', $payload);
-        $this->assertArrayHasKey('Metadata', $payload);
-        $this->assertArrayHasKey('MessageStream', $payload);
-
-        $this->assertSame('password-reset', $payload['Tag']);
-        $this->assertSame(['Color' => 'blue', 'Client-ID' => '12345'], $payload['Metadata']);
-        $this->assertSame('broadcasts', $payload['MessageStream']);
-    }
-
-    public function testMultipleTagsAreNotAllowed(): void
-    {
-        $email = new Email();
-        $email->getHeaders()->add(new TagHeader('tag1'));
-        $email->getHeaders()->add(new TagHeader('tag2'));
-        $envelope = new Envelope(new Address('alice@system.com'), [new Address('bob@system.com')]);
-
-        $transport = new ScalewayApiTransport('ACCESS_KEY', 'par-fr');
-        $method = new \ReflectionMethod(ScalewayApiTransport::class, 'getPayload');
-
-        $this->expectException(TransportException::class);
-
-        $method->invoke($transport, $email, $envelope);
     }
 }

@@ -1,5 +1,9 @@
 # Symfony Scaleway TEM mailer
 
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/korridor/symfony-scaleway-tem-mailer?style=flat-square)](https://packagist.org/packages/korridor/symfony-scaleway-tem-mailer)
+[![License](https://img.shields.io/packagist/l/korridor/symfony-scaleway-tem-mailer?style=flat-square)](license.md)
+[![Supported PHP versions](https://img.shields.io/packagist/php-v/korridor/symfony-scaleway-tem-mailer?style=flat-square)](https://packagist.org/packages/korridor/symfony-scaleway-tem-mailer)
+
 ## Installation
 
 You can install the package via composer with following command:
@@ -8,11 +12,63 @@ You can install the package via composer with following command:
 composer require korridor/symfony-scaleway-tem-mailer
 ```
 
+### Requirements
+
+This package is tested for the following Laravel and PHP versions:
+
+- 9.* (PHP 8.1)
+
 ## Usage examples
 
 ### Laravel
 
-TODO
+Add the following code to the `AppServiceProvider`:
+
+```php
+use Korridor\SymfonyScalewayTemMailer\Transport\ScalewayApiTransport;
+use Korridor\SymfonyScalewayTemMailer\Transport\ScalewaySmtpTransport;
+
+    // ..
+
+    /**
+     * Bootstrap any application services.
+     *
+     * @return void
+     */
+    public function boot(): void
+    {
+        // ...
+        Mail::extend('scaleway-api', function (array $config = []) {
+            return new ScalewayApiTransport($config['token'], $config['region'], $config['project_id']);
+        });
+        Mail::extend('scaleway-smtp', function (array $config = []) {
+            return new ScalewaySmtpTransport($config['token'], $config['region'], $config['project_id']);
+        }); 
+    }
+
+```
+
+Now add the following lines to the `config/mail.php` file in the `mailers` array:
+
+```php
+'scaleway' => [
+    'transport' => 'scaleway-api',
+    'region' => env('MAIL_SCALEWAY_REGION', 'fr-par'),
+    'token' => env('MAIL_SCALEWAY_TOKEN'),
+    'project_id' => env('MAIL_SCALEWAY_PROJECT_ID'),
+],
+```
+
+If you want to use the SMTP integration instead use following lines:
+
+```php
+'scaleway' => [
+    'transport' => 'scaleway-smtp',
+    'region' => env('MAIL_SCALEWAY_REGION', 'fr-par'),
+    'token' => env('MAIL_SCALEWAY_TOKEN'),
+    'project_id' => env('MAIL_SCALEWAY_PROJECT_ID'),
+],
+```
 
 ## Contributing
 
@@ -30,12 +86,17 @@ docker-compose run workspace bash
 ### Testing
 
 The `composer test` command runs all tests with [phpunit](https://phpunit.de/).
-The `composer test-coverage` command runs all tests with phpunit and creates a coverage report into the `coverage` folder.
+The `composer test-coverage` command runs all tests with phpunit and creates a coverage report into the `coverage`
+folder.
 
 ### Codeformatting/Linting
 
 The `composer fix` command formats the code with [php-cs-fixer](https://github.com/FriendsOfPHP/PHP-CS-Fixer).
 The `composer lint` command checks the code with [phpcs](https://github.com/squizlabs/PHP_CodeSniffer).
+
+## Credits
+
+The structure of the repository is inspired by the project [symfony/postmark-mailer](https://github.com/symfony/postmark-mailer).
 
 ## License
 

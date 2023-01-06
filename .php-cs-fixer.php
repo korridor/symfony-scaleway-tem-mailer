@@ -3,7 +3,7 @@
 return (new PhpCsFixer\Config())
     ->setRiskyAllowed(false)
     ->setRules([
-        '@PSR2' => true,
+        '@PSR12' => true,
     ])
     ->setUsingCache(true)
     ->setFinder(

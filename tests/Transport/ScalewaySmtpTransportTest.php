@@ -1,9 +1,9 @@
 <?php
 
-namespace Symfony\Component\Mailer\Bridge\Scaleway\Tests\Transport;
+namespace Korridor\SymfonyScalewayTemMailer\Tests\Transport;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Mailer\Bridge\Scaleway\Transport\ScalewaySmtpTransport;
+use Korridor\SymfonyScalewayTemMailer\Transport\ScalewaySmtpTransport;
 use Symfony\Component\Mime\Email;
 
 class ScalewaySmtpTransportTest extends TestCase
@@ -13,7 +13,7 @@ class ScalewaySmtpTransportTest extends TestCase
         // Arrange
         $email = new Email();
         $email->getHeaders()->addTextHeader('foo', 'bar');
-        $transport = new ScalewaySmtpTransport('ACCESS_KEY');
+        $transport = new ScalewaySmtpTransport('token', 'fr-par', 'project-id');
         $method = new \ReflectionMethod(ScalewaySmtpTransport::class, 'addScalewayHeaders');
 
         // Act
@@ -29,7 +29,7 @@ class ScalewaySmtpTransportTest extends TestCase
         // Arrange
         $email = new Email();
         $email->getHeaders()->addTextHeader('foo', 'bar');
-        $transport = new ScalewaySmtpTransport('ACCESS_KEY');
+        $transport = new ScalewaySmtpTransport('token', 'fr-par', 'project-id');
         $method = new \ReflectionMethod(ScalewaySmtpTransport::class, 'addScalewayHeaders');
 
         // Act

@@ -2,7 +2,7 @@
   "name": "korridor/symfony-scaleway-tem-mailer",
   "type": "symfony-mailer-bridge",
   "description": "Symfony Scaleway transaction email (TEM) Mailer Bridge",
-  "keywords": [],
+  "keywords": ["symfony", "scaleway", "symfony-mailer", "scaleway-api"],
   "homepage": "https://github.com/korridor/symfony-scaleway-tem-mailer",
   "license": "MIT",
   "authors": [
@@ -29,12 +29,12 @@
   },
   "autoload": {
     "psr-4": {
-      "Symfony\\Component\\Mailer\\Bridge\\Scaleway\\": "src/"
+      "Korridor\\SymfonyScalewayTemMailer\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Symfony\\Component\\Mailer\\Bridge\\Scaleway\\Tests\\": "tests/"
+      "Korridor\\SymfonyScalewayTemMailer\\Tests\\": "tests/"
     }
   },
   "minimum-stability": "dev"
