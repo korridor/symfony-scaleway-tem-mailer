@@ -70,6 +70,24 @@ If you want to use the SMTP integration instead use following lines:
 ],
 ```
 
+### Symfony
+
+Add the following lines to the `config/services.yaml` file:
+
+```yaml
+mailer.transport_factory.scaleway:
+    class: Korridor\SymfonyScalewayTemMailer\Transport\ScalewayTransportFactory
+    parent: mailer.transport_factory.abstract
+    tags:
+        - {name: mailer.transport_factory}
+```
+
+Then `MAILER_DSN` environment variable for example like this:
+
+```dotenv
+MAILER_DSN=scaleway+api://ACCESS_ID:SECRET@api.scaleway.com
+```
+
 ## Contributing
 
 I am open for suggestions and contributions. Just create an issue or a pull request.
