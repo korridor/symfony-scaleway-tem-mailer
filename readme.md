@@ -3,6 +3,8 @@
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/korridor/symfony-scaleway-tem-mailer?style=flat-square)](https://packagist.org/packages/korridor/symfony-scaleway-tem-mailer)
 [![License](https://img.shields.io/packagist/l/korridor/symfony-scaleway-tem-mailer?style=flat-square)](license.md)
 [![Supported PHP versions](https://img.shields.io/packagist/php-v/korridor/symfony-scaleway-tem-mailer?style=flat-square)](https://packagist.org/packages/korridor/symfony-scaleway-tem-mailer)
+![GitHub Workflow Tests Status](https://img.shields.io/github/actions/workflow/status/korridor/symfony-scaleway-tem-mailer/unittests.yml?label=tests&style=flat-square)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/korridor/symfony-scaleway-tem-mailer/lint.yml?label=lint&style=flat-square)
 
 ## Installation
 
