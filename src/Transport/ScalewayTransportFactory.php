@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Korridor\SymfonyScalewayTemMailer\Transport;
 
 use Symfony\Component\Mailer\Exception\UnsupportedSchemeException;

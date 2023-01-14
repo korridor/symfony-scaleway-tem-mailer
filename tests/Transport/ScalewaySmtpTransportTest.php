@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Korridor\SymfonyScalewayTemMailer\Tests\Transport;
 
 use PHPUnit\Framework\TestCase;

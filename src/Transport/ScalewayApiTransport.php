@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Korridor\SymfonyScalewayTemMailer\Transport;
 
 use Psr\EventDispatcher\EventDispatcherInterface;
