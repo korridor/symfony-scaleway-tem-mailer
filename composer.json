@@ -25,7 +25,7 @@
     "test": "vendor/bin/phpunit",
     "test-coverage": "vendor/bin/phpunit --coverage-html coverage",
     "fix": "./vendor/bin/php-cs-fixer fix",
-    "lint": "./vendor/bin/phpcs --error-severity=1 --warning-severity=8 --extensions=php"
+    "lint": "./vendor/bin/phpcs --extensions=php"
   },
   "autoload": {
     "psr-4": {

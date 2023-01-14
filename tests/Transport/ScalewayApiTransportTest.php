@@ -6,11 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 use Korridor\SymfonyScalewayTemMailer\Transport\ScalewayApiTransport;
-use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\Exception\HttpTransportException;
-use Symfony\Component\Mailer\Exception\TransportException;
-use Symfony\Component\Mailer\Header\MetadataHeader;
-use Symfony\Component\Mailer\Header\TagHeader;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Contracts\HttpClient\ResponseInterface;
@@ -58,7 +54,18 @@ class ScalewayApiTransportTest extends TestCase
             $this->assertSame('Hello!', $body['subject']);
             $this->assertSame('Hello There!', $body['text']);
 
-            return new MockResponse(json_encode(['id' => 'foo-bar']), [
+            return new MockResponse(json_encode([
+                'emails' => [
+                    (object) [
+                        'id' => 'email-1',
+                        'message_id' => 'some-uuid',
+                    ],
+                    (object) [
+                        'id' => 'email-2',
+                        'message_id' => 'some-uuid',
+                    ]
+                ]
+            ]), [
                 'http_code' => 200,
             ]);
         });
@@ -77,7 +84,7 @@ class ScalewayApiTransportTest extends TestCase
         $message = $transport->send($mail);
 
         // Assert
-        $this->assertSame('foo-bar', $message->getMessageId());
+        $this->assertSame('some-uuid', $message->getMessageId());
     }
 
     public function testSendThrowsForErrorResponse(): void

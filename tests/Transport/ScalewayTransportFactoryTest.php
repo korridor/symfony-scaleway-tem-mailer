@@ -59,7 +59,9 @@ class ScalewayTransportFactoryTest extends TransportFactoryTestCase
 
         yield [
             new Dsn('scaleway+api', 'example.com', self::USER, self::PASSWORD, 8080),
-            (new ScalewayApiTransport(self::PASSWORD, 'fr-par', self::USER, $this->getClient(), $dispatcher, $logger))->setHost('example.com')->setPort(8080),
+            (new ScalewayApiTransport(self::PASSWORD, 'fr-par', self::USER, $this->getClient(), $dispatcher, $logger))
+                ->setHost('example.com')
+                ->setPort(8080),
         ];
 
         yield [
@@ -86,7 +88,8 @@ class ScalewayTransportFactoryTest extends TransportFactoryTestCase
     {
         yield [
             new Dsn('scaleway', 'default', self::USER, self::PASSWORD),
-            'The "scaleway" scheme is not supported; supported schemes for mailer "scaleway" are: "scaleway+api", "scaleway+smtp", "scaleway+smtps".',
+            'The "scaleway" scheme is not supported; supported schemes for mailer "scaleway" are:'.
+            ' "scaleway+api", "scaleway+smtp", "scaleway+smtps".',
         ];
     }
 

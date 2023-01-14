@@ -25,10 +25,16 @@ class ScalewayApiTransport extends AbstractApiTransport
 
     private string $projectId;
 
-    public function __construct(string $token, string $region, string $projectId, HttpClientInterface $client = null, EventDispatcherInterface $dispatcher = null, LoggerInterface $logger = null)
-    {
-        $this->token = $token;
-        $this->region = $region;
+    public function __construct(
+        string $token,
+        string $region,
+        string $projectId,
+        HttpClientInterface $client = null,
+        EventDispatcherInterface $dispatcher = null,
+        LoggerInterface $logger = null
+    ) {
+        $this->token     = $token;
+        $this->region    = $region;
         $this->projectId = $projectId;
         parent::__construct($client, $dispatcher, $logger);
     }
@@ -40,25 +46,35 @@ class ScalewayApiTransport extends AbstractApiTransport
 
     protected function doSendApi(SentMessage $sentMessage, Email $email, Envelope $envelope): ResponseInterface
     {
-        $response = $this->client->request('POST', 'https://'.$this->getEndpoint().'/transactional-email/v1alpha1/regions/'.$this->getRegion().'/emails', [
-            'headers' => [
-                'Accept' => 'application/json',
-                'X-Auth-Token' => $this->token,
-            ],
-            'json' => $this->getPayload($email, $envelope),
-        ]);
+        $response = $this->client->request(
+            'POST',
+            'https://'.$this->getEndpoint().'/transactional-email/v1alpha1/regions/'.$this->getRegion().'/emails',
+            [
+                'headers' => [
+                    'Accept'       => 'application/json',
+                    'X-Auth-Token' => $this->token,
+                ],
+                'json'    => $this->getPayload($email, $envelope),
+            ]
+        );
 
         try {
             $statusCode = $response->getStatusCode();
-            $result = $response->toArray(false);
+            $result     = $response->toArray(false);
         } catch (DecodingExceptionInterface) {
-            throw new HttpTransportException('Unable to send an email: '.$response->getContent(false).sprintf(' (code %d).', $statusCode), $response);
+            throw new HttpTransportException('Unable to send an email: '.$response->getContent(false).sprintf(
+                ' (code %d).',
+                $statusCode
+            ), $response);
         } catch (TransportExceptionInterface $e) {
             throw new HttpTransportException('Could not reach the remote Scaleway server.', $response, 0, $e);
         }
 
         if (200 !== $statusCode) {
-            throw new HttpTransportException('Unable to send an email: '.$result['message'].' Details: '.print_r($result, true), $response);
+            throw new HttpTransportException('Unable to send an email: '.$result['message'].' Details: '.print_r(
+                $result,
+                true
+            ), $response);
         }
 
         $sentMessage->setMessageId($result['emails'][0]['message_id']);
@@ -69,14 +85,14 @@ class ScalewayApiTransport extends AbstractApiTransport
     private function getPayload(Email $email, Envelope $envelope): array
     {
         $payload = [
-            'from' => $this->getAddressObject($envelope->getSender()),
-            'to' => $this->getAddressesArray($this->getRecipients($email, $envelope)),
-            'cc' => $this->getAddressesArray($email->getCc()),
-            'bcc' => $this->getAddressesArray($email->getBcc()),
-            'subject' => $email->getSubject(),
-            'text' => $email->getTextBody(),
-            'html' => $email->getHtmlBody(),
-            'project_id' => $this->projectId,
+            'from'        => $this->getAddressObject($envelope->getSender()),
+            'to'          => $this->getAddressesArray($this->getRecipients($email, $envelope)),
+            'cc'          => $this->getAddressesArray($email->getCc()),
+            'bcc'         => $this->getAddressesArray($email->getBcc()),
+            'subject'     => $email->getSubject(),
+            'text'        => $email->getTextBody(),
+            'html'        => $email->getHtmlBody(),
+            'project_id'  => $this->projectId,
             'attachments' => $this->getAttachments($email),
         ];
 
@@ -85,7 +101,6 @@ class ScalewayApiTransport extends AbstractApiTransport
             if (\in_array($name, $headersToBypass, true)) {
                 continue;
             }
-
             // TODO: ?
         }
 
@@ -101,7 +116,7 @@ class ScalewayApiTransport extends AbstractApiTransport
     {
         return (object) [
             'email' => $address->getAddress(),
-            'name' => $address->getName(),
+            'name'  => $address->getName(),
         ];
     }
 
@@ -116,6 +131,7 @@ class ScalewayApiTransport extends AbstractApiTransport
         foreach ($addresses as $address) {
             $data[] = $this->getAddressObject($address);
         }
+
         return $data;
     }
 
@@ -123,12 +139,12 @@ class ScalewayApiTransport extends AbstractApiTransport
     {
         $attachments = [];
         foreach ($email->getAttachments() as $attachment) {
-            $headers = $attachment->getPreparedHeaders();
+            $headers  = $attachment->getPreparedHeaders();
             $filename = $headers->getHeaderParameter('Content-Disposition', 'filename');
 
             $att = [
-                'name' => $filename,
-                'type' => $headers->get('Content-Type')->getBody(),
+                'name'    => $filename,
+                'type'    => $headers->get('Content-Type')->getBody(),
                 'content' => base64_encode($attachment->bodyToString()),
             ];
 

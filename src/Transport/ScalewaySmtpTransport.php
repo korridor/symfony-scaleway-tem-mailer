@@ -20,8 +20,13 @@ class ScalewaySmtpTransport extends EsmtpTransport
 
     private string $projectId;
 
-    public function __construct(string $token, string $region, string $projectId, EventDispatcherInterface $dispatcher = null, LoggerInterface $logger = null)
-    {
+    public function __construct(
+        string $token,
+        string $region,
+        string $projectId,
+        EventDispatcherInterface $dispatcher = null,
+        LoggerInterface $logger = null
+    ) {
         $this->token = $token;
         $this->region = $region;
         $this->projectId = $projectId;
