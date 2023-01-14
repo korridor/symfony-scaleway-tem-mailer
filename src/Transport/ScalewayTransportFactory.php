@@ -21,7 +21,16 @@ final class ScalewayTransportFactory extends AbstractTransportFactory
             $host = 'default' === $dsn->getHost() ? null : $dsn->getHost();
             $port = $dsn->getPort();
 
-            $transport = (new ScalewayApiTransport($token, $region, $projectId, $this->client, $this->dispatcher, $this->logger))->setHost($host)->setPort($port);
+            $transport = (new ScalewayApiTransport(
+                $token,
+                $region,
+                $projectId,
+                $this->client,
+                $this->dispatcher,
+                $this->logger
+            ))
+                ->setHost($host)
+                ->setPort($port);
         }
 
         if ('scaleway+smtp' === $scheme || 'scaleway+smtps' === $scheme) {
