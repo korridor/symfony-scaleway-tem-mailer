@@ -20,12 +20,7 @@
 
     <coverage>
         <include>
-            <directory>./</directory>
+            <directory>./src</directory>
         </include>
-        <exclude>
-            <directory>./Resources</directory>
-            <directory>./tests</directory>
-            <directory>./vendor</directory>
-        </exclude>
     </coverage>
 </phpunit>
