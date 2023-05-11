@@ -7,6 +7,8 @@ namespace Korridor\SymfonyScalewayTemMailer\Tests\Transport;
 use Korridor\SymfonyScalewayTemMailer\Transport\ScalewayApiTransport;
 use Korridor\SymfonyScalewayTemMailer\Transport\ScalewaySmtpTransport;
 use Korridor\SymfonyScalewayTemMailer\Transport\ScalewayTransportFactory;
+use Psr\Log\NullLogger;
+use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\Mailer\Test\TransportFactoryTestCase;
 use Symfony\Component\Mailer\Transport\Dsn;
 use Symfony\Component\Mailer\Transport\TransportFactoryInterface;
@@ -15,10 +17,10 @@ class ScalewayTransportFactoryTest extends TransportFactoryTestCase
 {
     public function getFactory(): TransportFactoryInterface
     {
-        return new ScalewayTransportFactory($this->getDispatcher(), $this->getClient(), $this->getLogger());
+        return new ScalewayTransportFactory(null, new MockHttpClient(), new NullLogger());
     }
 
-    public function supportsProvider(): iterable
+    public static function supportsProvider(): iterable
     {
         yield [
             new Dsn('scaleway+api', 'default', 'project-id', 'token', null, [
@@ -49,19 +51,19 @@ class ScalewayTransportFactoryTest extends TransportFactoryTestCase
         ];
     }
 
-    public function createProvider(): iterable
+    public static function createProvider(): iterable
     {
-        $dispatcher = $this->getDispatcher();
-        $logger = $this->getLogger();
+        $client = new MockHttpClient();
+        $logger = new NullLogger();
 
         yield [
             new Dsn('scaleway+api', 'default', self::USER, self::PASSWORD),
-            new ScalewayApiTransport(self::PASSWORD, 'fr-par', self::USER, $this->getClient(), $dispatcher, $logger),
+            new ScalewayApiTransport(self::PASSWORD, 'fr-par', self::USER, $client, null, $logger),
         ];
 
         yield [
             new Dsn('scaleway+api', 'example.com', self::USER, self::PASSWORD, 8080),
-            (new ScalewayApiTransport(self::PASSWORD, 'fr-par', self::USER, $this->getClient(), $dispatcher, $logger))
+            (new ScalewayApiTransport(self::PASSWORD, 'fr-par', self::USER, $client, null, $logger))
                 ->setHost('example.com')
                 ->setPort(8080),
         ];
@@ -70,23 +72,23 @@ class ScalewayTransportFactoryTest extends TransportFactoryTestCase
             new Dsn('scaleway+api', 'default', self::USER, self::PASSWORD, null, [
                 'region' => 'nl-ams'
             ]),
-            new ScalewayApiTransport(self::PASSWORD, 'nl-ams', self::USER, $this->getClient(), $dispatcher, $logger),
+            new ScalewayApiTransport(self::PASSWORD, 'nl-ams', self::USER, $client, null, $logger),
         ];
 
         yield [
             new Dsn('scaleway+smtp', 'default', self::USER, self::PASSWORD),
-            new ScalewaySmtpTransport(self::PASSWORD, 'fr-par', self::USER, $dispatcher, $logger),
+            new ScalewaySmtpTransport(self::PASSWORD, 'fr-par', self::USER, null, $logger),
         ];
 
         yield [
             new Dsn('scaleway+smtp', 'default', self::USER, self::PASSWORD, null, [
                 'region' => 'nl-ams'
             ]),
-            new ScalewaySmtpTransport(self::PASSWORD, 'nl-ams', self::USER, $dispatcher, $logger),
+            new ScalewaySmtpTransport(self::PASSWORD, 'nl-ams', self::USER, null, $logger),
         ];
     }
 
-    public function unsupportedSchemeProvider(): iterable
+    public static function unsupportedSchemeProvider(): iterable
     {
         yield [
             new Dsn('scaleway', 'default', self::USER, self::PASSWORD),
@@ -95,7 +97,7 @@ class ScalewayTransportFactoryTest extends TransportFactoryTestCase
         ];
     }
 
-    public function incompleteDsnProvider(): iterable
+    public static function incompleteDsnProvider(): iterable
     {
         yield [new Dsn('scaleway+api', 'default')];
     }
