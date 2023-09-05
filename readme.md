@@ -88,7 +88,7 @@ mailer.transport_factory.scaleway:
 Then `MAILER_DSN` environment variable for example like this:
 
 ```dotenv
-MAILER_DSN=scaleway+api://ACCESS_ID:SECRET@api.scaleway.com
+MAILER_DSN=scaleway+api://SCW_PROJECT_ID:SCW_SECRET_KEY@api.scaleway.com
 ```
 
 ## Contributing
