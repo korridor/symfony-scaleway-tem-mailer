@@ -7,6 +7,11 @@
 [![GitHub Workflow Lint](https://img.shields.io/github/actions/workflow/status/korridor/symfony-scaleway-tem-mailer/lint.yml?label=lint&style=flat-square)](https://github.com/korridor/symfony-scaleway-tem-mailer/actions/workflows/lint.yml)
 [![Codecov](https://img.shields.io/codecov/c/github/korridor/symfony-scaleway-tem-mailer?style=flat-square)](https://codecov.io/gh/korridor/symfony-scaleway-tem-mailer)
 
+> [!WARNING]  
+> This package is no longer necessary since Symfony created their own mailer for Scaleway TEM.
+>
+> Please use this instead: [Symfony Mailer - Scaleway](https://github.com/symfony/scaleway-mailer)
+
 ## Installation
 
 You can install the package via composer with following command:
